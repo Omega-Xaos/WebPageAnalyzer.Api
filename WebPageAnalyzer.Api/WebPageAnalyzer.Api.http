@@ -1,0 +1,15 @@
+@WebPageAnalyzer.Api_HostAddress = http://localhost:8090
+
+POST {{WebPageAnalyzer.Api_HostAddress}}/api/analyze
+Content-Type: application/json
+
+{
+  "selector": "a[href]",
+  "attribute": "href",
+  "url_b64": "",
+  "encrypted_text_bytes_b64": "",
+  "key_bytes_b64": "",
+  "page_b64": ""
+}
+
+###

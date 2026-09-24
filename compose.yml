@@ -1,0 +1,77 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: webpageanalyzer-postgres
+
+    environment:
+      POSTGRES_DB: webpage_analyzer
+      POSTGRES_USER: webpage_user
+      POSTGRES_PASSWORD: webpage_password
+
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U webpage_user -d webpage_analyzer"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+
+  api:
+    build:
+      context: .
+      dockerfile: WebPageAnalyzer.Api/Dockerfile
+
+    container_name: webpageanalyzer-api
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: 8080
+      ConnectionStrings__PostgreSql: "Host=postgres;Port=5432;Database=webpage_analyzer;Username=webpage_user;Password=webpage_password"
+
+    volumes:
+      - ./WebPageAnalyzer.Api:/src
+      - api_bin:/src/bin
+      - api_obj:/src/obj
+      - nuget_packages:/root/.nuget/packages
+
+    ports:
+      - "8090:8080"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+
+  pgadmin:
+    image: dpage/pgadmin4:9.18
+    container_name: webpageanalyzer-pgadmin
+
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: pgadmin123
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+      PGADMIN_REPLACE_SERVERS_ON_STARTUP: "True"
+      PGPASS_FILE: /pgadmin4/pgpass
+
+    ports:
+      - "127.0.0.1:8080:80"
+
+    volumes:
+      - ./pgadmin/servers.json:/pgadmin4/servers.json:ro
+      - ./pgadmin/pgpass:/pgadmin4/pgpass:ro
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+
+volumes:
+  postgres_data:
+  api_bin:
+  api_obj:
+  nuget_packages:

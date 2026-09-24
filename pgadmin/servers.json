@@ -1,0 +1,16 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "WebPageAnalyzer PostgreSQL",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "webpage_analyzer",
+      "Username": "webpage_user",
+      "SSLMode": "prefer",
+      "ConnectionParameters": {
+        "passfile": "/var/lib/pgadmin/.pgpass"
+      }
+    }
+  }
+}
